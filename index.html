@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Layout</title>
+
+    <style>
+        body {
+            background-color: #f0f0f0; /* light gray background */
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            height: 100%;
+        }
+
+        nav.sidebar {
+            width: 220px;
+            background: #b3d9ff; /* light blue background */
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        nav.sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        nav.sidebar li {
+            margin-bottom: 17px;
+        }
+
+        nav.sidebar a {
+            text-decoration: none;
+            color: #003366;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        main#content {
+            flex: 1;
+            padding: 20px;
+            background: #ffffff; /* white background */
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>SDIHS</h1>
+</header>
+
+<div class="container">
+
+    <nav class="sidebar">
+        <ul>
+            <li><a onclick="loadContent('home')">School Profile</a></li>
+            <li><a onclick="loadContent('shs')">SHS</a></li>
+            <li><a onclick="loadContent('jhs')">JHS</a></li>
+        </ul>
+    </nav>
+
+    <main id="content">
+        <h2>Welcome, SDIHS!</h2>
+        <p>Pulang Santo likas na mabait, matalino, at akribol<br>
+        School for talented students.</p>
+    </main>
+
+</div>
+
+<footer>
+    <p>&copy; Fourth Year Students Batch 2025 - 2026.</p>
+</footer>
+
+<script>
+    function loadContent(section) {
+        const content = document.getElementById('content');
+
+        if (section === 'home') {
+            content.innerHTML = 
+                `<h2>School Profile</h2>
+                <h3>Mission</h3>
+                <p>We dream of Filipinos who passionately love their country and whose values and
+                competencies enable them to realize their full potential and contribute meaningfully
+                to building the nation. As a learner-centered public institution, the Department of
+                Education continuously improves itself to better serve its stakeholders.</p>`;
+        }
+
+        else if (section === 'shs') {
+            content.innerHTML = 
+                `<h2>SHS</h2>
+                <p>... contents for senior high students</p>`;
+        }
+
+        else if (section === 'jhs') {
+            content.innerHTML = 
+                `<h2>JHS</h2>
+                <p>... contents for junior high students</p>`;
+        }
+    }
+</script>
+
+</body>
+</html>
