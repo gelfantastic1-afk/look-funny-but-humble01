@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TLE Cyber Arena – Glowing UI</title>
+<style>
+
+/* BACKGROUND */
+#bgCanvas{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-1;
+}
+
+/* BODY */
+body{
+margin:0;
+font-family:Arial;
+color:white;
+overflow:hidden;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+height:100vh;
+background: linear-gradient(135deg, #001133, #003366, #000055);
+}
+
+/* START SCREEN */
+#startScreen{
+position:absolute;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:20;
+}
+
+#startScreen h1{
+font-size:60px;
+margin-bottom:50px;
+color:#00ffff;
+text-shadow:0 0 20px #00ffff;
+}
+
+#startScreen button{
+padding:20px 50px;
+font-size:25px;
+background:linear-gradient(45deg,#00ffff,#ff00ff);
+border:none;
+border-radius:15px;
+color:white;
+cursor:pointer;
+box-shadow:0 0 20px #0ff;
+}
+
+/* SCORE */
+#score{
+position:absolute;
+left:20px;
+top:20px;
+font-size:25px;
+color:#00ffff;
+}
+
+/* QUESTION BOX - ENLARGED */
+#questionBox{
+background:linear-gradient(145deg,#0a2a4c,#1c3a70);
+padding:40px 50px;
+border-radius:20px;
+box-shadow:0 0 30px #00ffff88;
+max-width:700px;
+transform:scale(1.2);
+}
+
+/* TIMER - ENLARGED */
+#timer{
+font-size:50px;
+color:#00ffff;
+margin-bottom:15px;
+}
+
+/* QUESTION - ENLARGED */
+#question{
+font-size:35px;
+margin-bottom:25px;
+}
+
+/* CHOICES - ENLARGED */
+.choice{
+margin:12px 0;
+padding:20px;
+background:linear-gradient(135deg,#004080,#0066cc);
+border-radius:15px;
+cursor:pointer;
+color:#00ffff;
+font-weight:bold;
+transition:0.3s;
+font-size:22px;
+}
+
+/* FEEDBACK */
+#feedback{
+position:absolute;
+top:40%;
+font-size:80px;
+opacity:0;
+transition:0.3s;
+}
+
+/* END SCREEN */
+#endScreen{
+position:absolute;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.85);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:20;
+}
+
+#resultTitle{
+font-size:80px;
+margin-bottom:20px;
+color:#00ffff;
+text-shadow:0 0 30px #00ffff;
+animation:glow 1s infinite alternate;
+}
+
+@keyframes glow{
+from{ text-shadow:0 0 10px #00ffff;}
+to{ text-shadow:0 0 30px #00ffff,0 0 50px #00ffff;}
+}
+
+#finalScore{
+font-size:45px;
+margin-top:15px;
+color:#ffffff;
+}
+
+#resultMessage{
+font-size:32px;
+margin-top:20px;
+color:#00ffaa;
+max-width:800px;
+}
+
+#endScreen button{
+margin-top:40px;
+padding:20px 60px;
+font-size:24px;
+background:linear-gradient(45deg,#00ffff,#ff00ff);
+border:none;
+border-radius:12px;
+color:white;
+cursor:pointer;
+box-shadow:0 0 20px #00ffff;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div id="startScreen">
+<h1>TLE CYBER ARENA</h1>
+<button onclick="startGame()">START GAME</button>
+</div>
+
+<div id="score">Score: 0</div>
+
+<div id="questionBox">
+<div id="timer">15</div>
+<div id="question"></div>
+<div id="choices"></div>
+</div>
+
+<div id="feedback"></div>
+
+<div id="endScreen">
+<h1 id="resultTitle">Mission Complete 🚀</h1>
+<div id="finalScore"></div>
+<div id="resultMessage"></div>
+<button onclick="restartGame()">Play Again</button>
+</div>
+
+<script>
+
+/* BACKGROUND */
+const canvas=document.getElementById("bgCanvas");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let stars=[];
+for(let i=0;i<150;i++){
+stars.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+size:Math.random()*2,
+speed:Math.random()*0.5
+});
+}
+
+function animateBG(){
+ctx.fillStyle="rgba(0,0,0,0.3)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+stars.forEach(s=>{
+s.y+=s.speed;
+if(s.y>canvas.height)s.y=0;
+ctx.fillStyle="white";
+ctx.fillRect(s.x,s.y,s.size,s.size);
+});
+requestAnimationFrame(animateBG);
+}
+animateBG();
+
+/* SOUND */
+const audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+function beep(freq){
+let osc=audioCtx.createOscillator();
+let gain=audioCtx.createGain();
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+osc.frequency.value=freq;
+osc.start();
+gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);
+osc.stop(audioCtx.currentTime+0.3);
+}
+
+/* QUESTIONS */
+let questions=[
+{q:"What does ICT stand for?",c:["Information Communication Technology","Internet Control Tool","Internal Computer Tech","Input Control Tech"],a:0},
+{q:"Which is output device?",c:["Monitor","Keyboard","Mouse","Scanner"],a:0},
+{q:"Brain of computer?",c:["CPU","RAM","SSD","GPU"],a:0},
+{q:"RAM is used for?",c:["Temporary storage","Permanent storage","Internet","Graphics"],a:0},
+{q:"Antivirus purpose?",c:["Protect from malware","Speed CPU","Delete files","Format PC"],a:0}
+];
+
+let current=0;
+let score=0;
+let time=15;
+let timerInterval;
+let gameRunning=false;
+
+/* START */
+function startGame(){
+document.getElementById("startScreen").style.display="none";
+resetGame();
+}
+
+function resetGame(){
+current=0;
+score=0;
+time=15;
+gameRunning=true;
+document.getElementById("endScreen").style.display="none";
+updateUI();
+showQuestion();
+
+clearInterval(timerInterval);
+timerInterval=setInterval(()=>{
+time--;
+updateUI();
+if(time<=0){
+current++;
+time=15;
+showQuestion();
+}
+},1000);
+}
+
+/* SHOW QUESTION */
+function showQuestion(){
+
+if(current>=questions.length){
+endGame();
+return;
+}
+
+let q=questions[current];
+
+document.getElementById("question").innerText=q.q;
+
+let html="";
+q.c.forEach((choice,i)=>{
+html+=`<div class="choice" onclick="answer(${i})">${choice}</div>`;
+});
+
+document.getElementById("choices").innerHTML=html;
+}
+
+/* ANSWER */
+function answer(i){
+
+let q=questions[current];
+let choices=document.querySelectorAll(".choice");
+let feedback=document.getElementById("feedback");
+
+choices.forEach(c=>c.style.pointerEvents="none");
+
+choices.forEach((c,index)=>{
+if(index==q.a){
+c.style.background="#00ff88";
+c.style.color="black";
+}
+if(index==i && index!=q.a){
+c.style.background="#ff3333";
+}
+});
+
+if(i==q.a){
+score++;
+feedback.innerText="✔";
+feedback.style.color="lime";
+beep(700);
+}else{
+feedback.innerText="✖";
+feedback.style.color="red";
+beep(200);
+}
+
+feedback.style.opacity=1;
+
+setTimeout(()=>{
+feedback.style.opacity=0;
+current++;
+time=15;
+updateUI();
+showQuestion();
+},1200);
+
+}
+
+/* UI */
+function updateUI(){
+document.getElementById("score").innerText="Score: "+score;
+document.getElementById("timer").innerText=time;
+}
+
+/* CREATIVE END SCREEN */
+function endGame(){
+
+gameRunning=false;
+document.getElementById("endScreen").style.display="flex";
+
+let percentage=Math.round(score/questions.length*100);
+
+document.getElementById("finalScore").innerText=
+"Your Score: "+score+" / "+questions.length+" ("+percentage+"%)";
+
+let title="";
+let message="";
+
+if(percentage==100){
+title="ICT Mastermind 🏆";
+message="Outstanding performance! Perfect score!";
+}
+else if(percentage>=80){
+title="Tech Champion ⭐";
+message="Excellent work! You're very skilled!";
+}
+else if(percentage>=60){
+title="Digital Explorer 🚀";
+message="Great effort! Keep improving!";
+}
+else if(percentage>=40){
+title="Cyber Learner 💡";
+message="Nice try! Practice makes perfect!";
+}
+else{
+title="Future Tech Star 🌟";
+message="Keep learning! You'll improve!";
+}
+
+document.getElementById("resultTitle").innerText=title;
+document.getElementById("resultMessage").innerText=message;
+
+beep(500);
+}
+
+function restartGame(){
+resetGame();
+}
+
+</script>
+
+</body>
+</html>
+
