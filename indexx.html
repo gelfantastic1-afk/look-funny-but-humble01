@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ICT Quiz Game</title>
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+text-align:center;
+margin:0;
+padding:0;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+margin-top:40px;
+background:rgba(0,0,0,0.6);
+padding:20px;
+border-radius:20px;
+box-shadow:0 0 20px cyan;
+}
+
+h1{
+color:cyan;
+}
+
+.question{
+font-size:22px;
+margin:20px;
+}
+
+.btn{
+display:block;
+width:90%;
+margin:10px auto;
+padding:12px;
+border:none;
+border-radius:10px;
+font-size:18px;
+cursor:pointer;
+background:linear-gradient(45deg,cyan,blue);
+color:white;
+transition:0.3s;
+}
+
+.btn:hover{
+transform:scale(1.05);
+background:linear-gradient(45deg,blue,cyan);
+}
+
+.correct{
+background:green !important;
+}
+
+.wrong{
+background:red !important;
+}
+
+#score{
+font-size:20px;
+margin:10px;
+color:yellow;
+}
+
+#timer{
+font-size:20px;
+color:orange;
+}
+
+#startBtn{
+background:linear-gradient(45deg,green,lime);
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>ICT Quiz Game</h1>
+
+<div id="score">Score: 0</div>
+<div id="timer">Time: 10</div>
+
+<div id="question" class="question">
+Press Start to play
+</div>
+
+<div id="answers"></div>
+
+<button id="startBtn" class="btn" onclick="startGame()">
+Start Game
+</button>
+
+</div>
+
+<script>
+
+let questions=[
+{
+q:"1. What does ICT stand for?",
+a:["Information and Communication Technology",
+"Internet and Computer Technology",
+"Integrated Computer Technology",
+"Information Computer Tool"],
+correct:0
+},
+
+{
+q:"2. What device is used to input text?",
+a:["Monitor","Keyboard","Speaker","Printer"],
+correct:1
+},
+
+{
+q:"3. What is the brain of the computer?",
+a:["RAM","Hard Drive","CPU","Mouse"],
+correct:2
+},
+
+{
+q:"4. What software is used to browse internet?",
+a:["Chrome","Word","Excel","PowerPoint"],
+correct:0
+},
+
+{
+q:"5. What does RAM stand for?",
+a:["Read Access Memory",
+"Random Access Memory",
+"Run Access Memory",
+"Ready Access Memory"],
+correct:1
+}
+
+];
+
+let current=0;
+let score=0;
+let timer=10;
+let interval;
+
+function startGame(){
+current=0;
+score=0;
+showQuestion();
+}
+
+function showQuestion(){
+
+clearInterval(interval);
+timer=10;
+document.getElementById("timer").innerHTML="Time: "+timer;
+
+interval=setInterval(()=>{
+timer--;
+document.getElementById("timer").innerHTML="Time: "+timer;
+
+if(timer==0){
+nextQuestion();
+}
+
+},1000);
+
+let q=questions[current];
+
+document.getElementById("question").innerHTML=q.q;
+
+let answersHTML="";
+
+for(let i=0;i<q.a.length;i++){
+
+answersHTML+=`
+<button class="btn" onclick="checkAnswer(${i})">
+${q.a[i]}
+</button>
+`;
+
+}
+
+document.getElementById("answers").innerHTML=answersHTML;
+
+document.getElementById("score").innerHTML="Score: "+score;
+
+}
+
+function checkAnswer(index){
+
+let q=questions[current];
+let buttons=document.querySelectorAll(".btn");
+
+if(index==q.correct){
+score++;
+buttons[index].classList.add("correct");
+}else{
+buttons[index].classList.add("wrong");
+buttons[q.correct].classList.add("correct");
+}
+
+setTimeout(()=>{
+nextQuestion();
+},1000);
+
+}
+
+function nextQuestion(){
+
+current++;
+
+if(current>=questions.length){
+
+document.getElementById("question").innerHTML=
+"Game Over! Your Score: "+score+"/5";
+
+document.getElementById("answers").innerHTML="";
+
+clearInterval(interval);
+
+return;
+
+}
+
+showQuestion();
+
+}
+
+</script>
+
+</body>
+</html>
